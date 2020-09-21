@@ -4,6 +4,8 @@ import re
 import stat
 from ceph_volume import process
 from ceph_volume.api import lvm
+from ceph_volume.systemd import systemctl
+from ceph_volume.decorators import memoize
 from ceph_volume.util.system import get_file_contents
 
 
@@ -729,6 +731,7 @@ def get_block_devs_lsblk():
     return [re.split(r'\s+', line) for line in stdout]
 
 
+@memoize
 def get_devices(_sys_block_path='/sys/block'):
     """
     Captures all available block devices as reported by lsblk.
@@ -744,6 +747,7 @@ def get_devices(_sys_block_path='/sys/block'):
 
     block_devs = get_block_devs_lsblk()
 
+    systemctl.stop_udevd()
     for block in block_devs:
         devname = os.path.basename(block[0])
         diskname = block[1]
@@ -795,4 +799,6 @@ def get_devices(_sys_block_path='/sys/block'):
         metadata['locked'] = is_locked_raw_device(metadata['path'])
 
         device_facts[diskname] = metadata
+
+    systemctl.start_udevd()
     return device_facts

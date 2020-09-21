@@ -92,6 +92,17 @@ def mask_ceph_disk():
     )
 
 
+def stop_udevd():
+    stop("systemd-udevd")
+    stop("systemd-udevd-control.socket")
+    stop("systemd-udevd-kernel.socket")
+
+
+def start_udevd():
+    start("systemd-udevd")
+    start("systemd-udevd-control.socket")
+    start("systemd-udevd-kernel.socket")
+
 #
 # templates
 #
